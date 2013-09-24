@@ -1,0 +1,13 @@
+{
+"baseURL" : "http://localhost:8080/wsrobot-webapp",
+"properties" : { "prop1" : "value1" },
+"services" : {
+"service1" : { "name" : "service1", "url" : "/service1", "method" : "post", "headers" : {"header1" : "$prop1$", "Content-Type" : "application/json"}, "results" : { "result1" : "$.result1"} },
+"service2" : { "name" : "service2", "url" : "/service2/{0}", "method" : "get", "headers" : {"header1" : "$prop1$"} }
+},
+"tests" : [
+// comments are allowed
+{ "service" : "service1", "data" : "{\"data1\":\"test1\"}", "status" : 200},
+{ "service" : "service2", "headers" : {"header1" : "override1"}, "params" : [ "$result1$" ], "status" : 200 }
+]
+}

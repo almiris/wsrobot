@@ -1,0 +1,13 @@
+<project name="robot example" default="run" basedir=".">
+	<description>
+		Simple WSRobot Example
+	</description>
+	<property name="wsrobot_jar" value="${basedir}/../wsrobot-jar/target/wsrobot-jar-jar-with-dependencies.jar"/>
+	<property name="example1" value="${basedir}/example1"/>
+	<target name="run">
+	    <java jar="${wsrobot_jar}" fork="true">
+	        <arg value="${example1}.json"/>
+	        <arg value="${example1}.out"/>
+		</java>
+	</target>
+</project>
