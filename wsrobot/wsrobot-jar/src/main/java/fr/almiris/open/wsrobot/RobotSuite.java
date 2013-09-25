@@ -4,20 +4,17 @@ import java.util.List;
 import java.util.Map;
 
 public class RobotSuite {
-	private String baseURL;
-	/**
-	 * Not synchronized... at all !
-	 */
 	private Map<String,String> properties;
 	private Map<String, Service> services;
-	private List<RobotUnit> tests;
-
-	public String getBaseURL() {
-		return baseURL;
+	private List<RobotScenario> scenarios;
+	private Logger logger = new DefaultLogger();
+	
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 
-	public void setBaseURL(String baseURL) {
-		this.baseURL = baseURL;
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
 	}
 
 	public Map<String, Service> getServices() {
@@ -28,37 +25,40 @@ public class RobotSuite {
 		this.services = services;
 	}
 
-	public List<RobotUnit> getTests() {
-		return tests;
+	public List<RobotScenario> getScenarios() {
+		return scenarios;
 	}
 
-	public void setTests(List<RobotUnit> tests) {
-		this.tests = tests;
+	public void setScenarios(List<RobotScenario> scenarios) {
+		this.scenarios = scenarios;
 	}
 
-	public Map<String, String> getProperties() {
-		return properties;
+	public Logger getLogger() {
+		return logger;
 	}
 
-	public void setProperties(Map<String, String> properties) {
-		this.properties = properties;
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 
 	public void run() {
-		int count = 0;
+		int scount = 0;
+		long start = System.currentTimeMillis();
 		try {
-			if (tests != null) {
-				for (RobotUnit test : tests) {
-					test.run(this);
-					count++;
+			if (scenarios != null) {
+				for (RobotScenario scenario : scenarios) {
+					if (scenario.isActive()) {
+						scenario.run(this);
+						scount++;
+					}
 				}
 			}
 		}
 		catch (Exception e) {
-			System.out.println("Exception : " + e.toString());
+			getLogger().error("Exception : " + e.toString());
 		}
 		finally {
-			System.out.println(count + " test(s) executed");
+			getLogger().debug(scount + " scenario(s) executed in " + (System.currentTimeMillis() - start) + " ms");
 		}
 	}
 	

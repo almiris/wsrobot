@@ -14,9 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RobotRunner {
 	public static void main(String[] args) {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			RobotSuite suite = mapper.readValue(readFileStrippingComments(args[0]), RobotSuite.class);
-			suite.run();
+			if (args.length > 0) {
+				ObjectMapper mapper = new ObjectMapper();
+				RobotSuite suite = mapper.readValue(readFileStrippingComments(args[0]), RobotSuite.class);
+				suite.run();
+			}
 		}
 		catch (Exception e) {
 			System.out.println("Un problème est survenu : " + e.toString());
@@ -29,9 +31,11 @@ public class RobotRunner {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			String line;
+			int index = 1;
 			while ((line = reader.readLine()) != null) {
-				if (line.startsWith("//") == false) {
-					System.out.println(line);
+				if (line.trim().startsWith("//") == false) {
+					System.out.println(pad(index, 10) + " : " + line);
+					index++;
 					pw.println(line);
 				}			
 			}
@@ -42,5 +46,15 @@ public class RobotRunner {
 				reader.close();
 			}
 		}
+	}
+	
+	public static String pad(int value, int len) {
+		String str = String.valueOf(value);
+		StringWriter sw = new StringWriter();
+		sw.append(str);
+		for (int i = str.length(); i < len; i++) {
+			sw.append(" ");
+		}
+		return sw.toString();
 	}
 }
