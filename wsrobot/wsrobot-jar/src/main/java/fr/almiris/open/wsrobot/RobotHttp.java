@@ -1,6 +1,7 @@
 package fr.almiris.open.wsrobot;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -52,7 +53,7 @@ public class RobotHttp {
 			}
 
 			if (data != null) {
-				httpPost.setEntity(new StringEntity(data));
+				httpPost.setEntity(new StringEntity(data, Charset.forName("utf-8")));
 			}
 
 			response = httpclient.execute(httpPost);

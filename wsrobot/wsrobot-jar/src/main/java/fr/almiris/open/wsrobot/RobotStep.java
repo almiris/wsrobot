@@ -121,6 +121,7 @@ public class RobotStep {
 						else if (expectedValue.equals(actualValue) == false) {
 							stepOk = false;
 							failedControl = jsonPath;
+							suite.getLogger().debug("expected = " + expectedValue + "; actual = " + actualValue);
 							break;
 						}
 					}

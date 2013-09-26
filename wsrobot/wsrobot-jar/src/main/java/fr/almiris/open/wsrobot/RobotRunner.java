@@ -39,7 +39,8 @@ public class RobotRunner {
 					pw.println(line);
 				}			
 			}
-			return sw.toString();
+			String str = sw.toString();
+			return str == null ? str : str.replace("\t", "").replace("\r", "").replace("\n", "");
 		}
 		finally {
 			if (reader != null) {
