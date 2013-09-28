@@ -1,4 +1,4 @@
-package fr.almiris.open.wsrobot;
+package fr.almiris.open.wsrobot.log;
 
 public interface Logger {
 	public void debug(String str);

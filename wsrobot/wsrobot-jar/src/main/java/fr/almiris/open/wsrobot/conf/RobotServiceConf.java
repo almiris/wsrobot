@@ -1,14 +1,16 @@
-package fr.almiris.open.wsrobot;
+package fr.almiris.open.wsrobot.conf;
 
 import java.util.Map;
 
-public class Service {
+public class RobotServiceConf {
+	
 	private String name;
 	private String url;
 	private String method;
 	private Map<String,String> headers;
-	private Map<String,String> results;
-	public Service() {
+	private Map<String,String> jresults;
+
+	public RobotServiceConf() {
 	}
 	public String getName() {
 		return name;
@@ -34,10 +36,11 @@ public class Service {
 	public void setHeaders(Map<String, String> headers) {
 		this.headers = headers;
 	}
-	public Map<String, String> getResults() {
-		return results;
+	public Map<String, String> getJresults() {
+		return jresults;
 	}
-	public void setResults(Map<String, String> results) {
-		this.results = results;
+	public void setJresults(Map<String, String> jresults) {
+		this.jresults = jresults;
 	}
+
 }

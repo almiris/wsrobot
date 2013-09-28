@@ -1,1 +1,0 @@
-ALTER SEQUENCE compte_id_compte_seq RESTART with 50;

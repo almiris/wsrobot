@@ -1,52 +1,74 @@
 package fr.almiris.open.wsrobot;
 
-import java.util.List;
+import fr.almiris.open.wsrobot.conf.RobotScenarioConf;
+import fr.almiris.open.wsrobot.conf.RobotStepConf;
+import fr.almiris.open.wsrobot.conf.RobotSuiteConf;
+import fr.almiris.open.wsrobot.report.RobotScenarioReport;
+import fr.almiris.open.wsrobot.report.RobotStepReport;
 
 public class RobotScenario {
-	private String name;
-	private boolean active;
-	private List<RobotStep> steps;
-	
-	public String getName() {
-		return name;
+
+	public enum Status {
+		OK(0,"ok"),
+		ERROR(1,"error"),
+		EXCEPTION(2,"exception");
+		
+		private final int code;
+		private final String message;
+
+		Status(int code, String message) {
+			this.code = code;
+			this.message = message;
+		}
+
+		public int getCode() {
+			return code;
+		}
+
+		public String getMessage() {
+			return message;
+		}
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public boolean isActive() {
-		return active;
-	}
-	
-	public void setActive(boolean active) {
-		this.active = active;
-	}
-	
-	public List<RobotStep> getSteps() {
-		return steps;
-	}
-	
-	public void setSteps(List<RobotStep> steps) {
-		this.steps = steps;
-	}
-	
-	public void run(RobotSuite suite) {
-		int scount = 0;
+	public RobotScenarioReport run(RobotSuiteConf suiteConf, RobotScenarioConf scenarioConf, RobotSuite suite) {
+		int successCount = 0;
+		int errorCount = 0;
 		long start = System.currentTimeMillis();
+		RobotScenarioReport report = new RobotScenarioReport();
+		report.setConf(scenarioConf);
+		suite.getLogger().debug("=====");
+		suite.getLogger().debug("Executing scenario : " + scenarioConf.getName());
 		try {
-			if (steps != null) {
-				for (RobotStep step : steps) {
-					step.run(suite, this);
-					scount++;
+			if (scenarioConf.getSteps() != null) {
+				for (RobotStepConf stepConf : scenarioConf.getSteps()) {
+					RobotStep step = new RobotStep();
+					RobotStepReport stepReport = step.run(suiteConf, scenarioConf, stepConf, suite);
+					report.addStepReport(stepReport);
+					if (stepReport.getStatus() == RobotStep.Status.OK) {
+						successCount++;
+					}
+					else {
+						errorCount++;
+					}
 				}
 			}
+			report.setStatus(errorCount > 0 ? Status.ERROR : Status.OK);
+			return report;
 		}
 		catch (Exception e) {
+			report.setStatus(Status.EXCEPTION);
+			report.setException(e.toString());
 			suite.getLogger().error("Exception : " + e.toString());
+			return report;
 		}
 		finally {
-			suite.getLogger().debug(scount + " step(s) executed in " + (System.currentTimeMillis() - start) + " ms");
+			report.setSuccessCount(successCount);
+			report.setErrorCount(errorCount);
+			report.setExecutionTime(System.currentTimeMillis() - start);
+			suite.getLogger().debug("-----");
+			suite.getLogger().debug((successCount + errorCount) + " step(s) executed in " + (System.currentTimeMillis() - start) + " ms");
+			suite.getLogger().debug(errorCount == 0 ? "Success" : "Failed : " + errorCount + " error(s)");
+			suite.getLogger().debug("=====");
 		}		
 	}
 }

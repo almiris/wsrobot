@@ -1,4 +1,4 @@
-package fr.almiris.open.wsrobot;
+package fr.almiris.open.wsrobot.log;
 
 public class DefaultLogger implements Logger {
 

@@ -1,61 +1,104 @@
 package fr.almiris.open.wsrobot;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
+import fr.almiris.open.wsrobot.conf.RobotSuiteConf;
+import fr.almiris.open.wsrobot.report.RobotSuiteReport;
+import fr.almiris.open.wsrobot.util.FileTool;
+import fr.almiris.open.wsrobot.util.TemplateTool;
+
+/**
+ * Usage : RobotRunner <configuration file> <json output> <html output>
+ * @author yherrmann
+ *
+ */
 public class RobotRunner {
+	
 	public static void main(String[] args) {
+		RobotRunner robot = new RobotRunner();
+		FileReader fr = null;
+		FileWriter fwj = null;
+		FileWriter fwh = null;
 		try {
 			if (args.length > 0) {
-				ObjectMapper mapper = new ObjectMapper();
-				RobotSuite suite = mapper.readValue(readFileStrippingComments(args[0]), RobotSuite.class);
-				suite.run();
+				fr = new FileReader(args[0]);
+				RobotSuiteConf conf = robot.readConf(fr);
+				RobotSuite suite = new RobotSuite();
+				RobotSuiteReport report = suite.run(conf);
+				if (args.length > 1) {
+					fwj = new FileWriter(args[1]);
+					robot.writeReportAsJson(report, fwj);
+				}
+				if (args.length > 2) {
+					fwh = new FileWriter(args[2]);
+					robot.writeReportAsHTML(report, fwh);
+				}
+				System.exit(report.getErrorCount());
 			}
+			System.exit(0);
 		}
 		catch (Exception e) {
-			System.out.println("Un problème est survenu : " + e.toString());
-		}
-	}
-	public static String readFileStrippingComments(String file) throws FileNotFoundException, UnsupportedEncodingException, IOException {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			String line;
-			int index = 1;
-			while ((line = reader.readLine()) != null) {
-				if (line.trim().startsWith("//") == false) {
-					System.out.println(pad(index, 10) + " : " + line);
-					index++;
-					pw.println(line);
-				}			
-			}
-			String str = sw.toString();
-			return str == null ? str : str.replace("\t", "").replace("\r", "").replace("\n", "");
+			System.out.println("An error has occurred : " + e.toString());			
 		}
 		finally {
-			if (reader != null) {
-				reader.close();
+			try {
+				if (fr != null) {
+					fr.close();
+				}
+			}
+			catch (IOException ioe) {				
+				System.out.println("An error has occurred : " + ioe.toString());			
+			}
+			try {
+				if (fwj != null) {
+					fwj.close();
+				}
+			}
+			catch (IOException ioe) {				
+				System.out.println("An error has occurred : " + ioe.toString());			
+			}
+			try {
+				if (fwh != null) {
+					fwh.close();
+				}
+			}
+			catch (IOException ioe) {				
+				System.out.println("An error has occurred : " + ioe.toString());			
 			}
 		}
 	}
 	
-	public static String pad(int value, int len) {
-		String str = String.valueOf(value);
-		StringWriter sw = new StringWriter();
-		sw.append(str);
-		for (int i = str.length(); i < len; i++) {
-			sw.append(" ");
-		}
-		return sw.toString();
+	public RobotSuiteConf readConf(Reader reader) throws UnsupportedEncodingException, FileNotFoundException, IOException {
+		return getConfFromString(FileTool.readFileStrippingComments(reader));
+	}
+
+	public RobotSuiteConf getConfFromString(String configuration) throws JsonMappingException, JsonParseException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(configuration, RobotSuiteConf.class);
+	}
+
+	public void writeReportAsJson(RobotSuiteReport report, Writer writer) throws JsonGenerationException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		mapper.writeValue(writer, report);		
+	}
+
+	public void writeReportAsHTML(RobotSuiteReport report, Writer writer) throws TemplateTool.ProcessingException {
+		(new TemplateTool()).process("default.mustache", report, writer);
 	}
 }

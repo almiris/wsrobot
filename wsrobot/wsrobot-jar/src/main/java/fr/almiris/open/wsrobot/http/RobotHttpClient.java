@@ -1,4 +1,4 @@
-package fr.almiris.open.wsrobot;
+package fr.almiris.open.wsrobot.http;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -15,7 +15,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 
-public class RobotHttp {
+public class RobotHttpClient {
 
 	private final DefaultHttpClient httpclient = new DefaultHttpClient();
 
@@ -23,7 +23,7 @@ public class RobotHttp {
 	
 	private String content;
 	
-	public RobotHttp() {	
+	public RobotHttpClient() {	
 	}
 	
 	public HttpResponse getResponse() {
