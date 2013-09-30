@@ -15,6 +15,7 @@ public class RobotSuiteReport {
 	int errorCount;
 	long executionTime;
 	String exception;
+	long endTime;
 	
 	public RobotSuiteReport() {	
 	}
@@ -80,6 +81,14 @@ public class RobotSuiteReport {
 
 	public void setException(String exception) {
 		this.exception = exception;
+	}
+
+	public long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(long endTime) {
+		this.endTime = endTime;
 	}	
 	
 }

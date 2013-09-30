@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
 
 import fr.almiris.open.wsrobot.conf.RobotScenarioConf;
@@ -57,10 +58,14 @@ public class RobotStep {
 			return report;
 		}
 		
+		report.setService(serviceConf);
+		
 		String fullURL = MessageFormat.format(suiteConf.replaceProperties(serviceConf.getUrl()), suiteConf.replaceProperties(stepConf.getParams())).toString();
 		suite.getLogger().debug("-----");
 		suite.getLogger().debug("Executing service : " + serviceConf.getName() + " ("+ fullURL + ")");
 		
+		report.setFullURL(fullURL);
+				
 		Map<String,String> requestHeaders = new HashMap<String,String>();
 		
 		if (serviceConf.getHeaders() != null) {
@@ -93,7 +98,9 @@ public class RobotStep {
 			rp.get(fullURL, requestHeaders);
 		}
 		else if ("post".equalsIgnoreCase(serviceConf.getMethod()) == true) {
-			rp.post(fullURL, requestHeaders, suiteConf.replaceProperties(stepConf.getData()));
+			String data = suiteConf.replaceProperties(stepConf.getData());
+			report.setData(data);
+			rp.post(fullURL, requestHeaders, data);
 		}
 		else if ("delete".equalsIgnoreCase(serviceConf.getMethod()) == true) {
 			rp.delete(fullURL, requestHeaders);
@@ -143,18 +150,25 @@ public class RobotStep {
 		if (serviceConf.getJresults() != null && status >= 200 && status < 300) {
 			for (String property : serviceConf.getJresults().keySet()) {
 				String jsonPath = serviceConf.getJresults().get(property);
-				String value = JsonPath.read(content, jsonPath);
-				if (value == null) {
-					stepOk = false;
-					report.setStatus(Status.ERROR_RESULT_NOT_FOUND);
-					report.setResultNotFound(jsonPath);
-					suite.getLogger().error("Result not found : " + jsonPath);
-					return report;
+				String value = null;
+				try {
+					value = JsonPath.read(content, jsonPath);
 				}
-				else {
-					suiteConf.getProperties().put(property, value);
-					suite.getLogger().debug("Property " + property + " has been set to " + value);
-					report.setProperty(property, value);
+				catch (InvalidPathException ipa) {					
+				}
+				finally {
+					if (value == null) {
+						stepOk = false;
+						report.setStatus(Status.ERROR_RESULT_NOT_FOUND);
+						report.setResultNotFound(jsonPath);
+						suite.getLogger().error("Result not found : " + jsonPath);
+						return report;
+					}
+					else {
+						suiteConf.getProperties().put(property, value);
+						suite.getLogger().debug("Property " + property + " has been set to " + value);
+						report.setProperty(property, value);
+					}					
 				}
 			}
 		}

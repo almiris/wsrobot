@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class RobotSuiteConf {
 	
+	private String name;
 	private Map<String,String> properties;
 	private Map<String, RobotServiceConf> services;
 	private List<RobotScenarioConf> scenarios;
@@ -12,6 +13,14 @@ public class RobotSuiteConf {
 	public RobotSuiteConf() {
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Map<String, String> getProperties() {
 		return properties;
 	}

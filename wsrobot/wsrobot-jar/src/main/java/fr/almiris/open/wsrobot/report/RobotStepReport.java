@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fr.almiris.open.wsrobot.RobotStep;
+import fr.almiris.open.wsrobot.conf.RobotServiceConf;
 import fr.almiris.open.wsrobot.conf.RobotStepConf;
 
 public class RobotStepReport {
@@ -19,6 +20,9 @@ public class RobotStepReport {
 	String failedControlActualValue;
 	String resultNotFound;
 	Map<String,String> properties;
+	RobotServiceConf service;
+	String fullURL;
+	String data;
 	
 	public RobotStepReport() {	
 	}
@@ -116,5 +120,29 @@ public class RobotStepReport {
 			this.properties = new HashMap<String,String>();
 		}
 		this.properties.put(name, value);
+	}
+
+	public RobotServiceConf getService() {
+		return service;
+	}
+
+	public void setService(RobotServiceConf service) {
+		this.service = service;
+	}
+
+	public String getFullURL() {
+		return fullURL;
+	}
+
+	public void setFullURL(String fullURL) {
+		this.fullURL = fullURL;
+	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
 	}
 }

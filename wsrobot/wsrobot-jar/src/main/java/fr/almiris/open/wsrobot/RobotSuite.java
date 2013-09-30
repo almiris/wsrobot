@@ -1,5 +1,7 @@
 package fr.almiris.open.wsrobot;
 
+import java.util.Date;
+
 import fr.almiris.open.wsrobot.conf.RobotScenarioConf;
 import fr.almiris.open.wsrobot.conf.RobotSuiteConf;
 import fr.almiris.open.wsrobot.log.DefaultLogger;
@@ -80,6 +82,7 @@ public class RobotSuite {
 			return report;
 		}
 		finally {
+			report.setEndTime(new Date().getTime());
 			report.setSuccessCount(successCount);
 			report.setErrorCount(errorCount);
 			report.setExecutionTime(System.currentTimeMillis() - start);

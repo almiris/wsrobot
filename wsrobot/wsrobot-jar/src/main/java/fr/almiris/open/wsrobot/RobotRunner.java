@@ -99,6 +99,6 @@ public class RobotRunner {
 	}
 
 	public void writeReportAsHTML(RobotSuiteReport report, Writer writer) throws TemplateTool.ProcessingException {
-		(new TemplateTool()).process("default.mustache", report, writer);
+		(new TemplateTool()).process("default.html", report, writer);
 	}
 }

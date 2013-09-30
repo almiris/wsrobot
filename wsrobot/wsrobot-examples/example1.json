@@ -1,4 +1,6 @@
 {
+	"name" : "Simple example",
+	
 	// global properties
 	"properties" : { 
 		"baseURL" : "http://localhost:8080/wsrobot-webapp",
