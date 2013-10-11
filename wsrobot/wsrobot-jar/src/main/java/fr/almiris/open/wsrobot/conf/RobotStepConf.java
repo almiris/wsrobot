@@ -3,6 +3,7 @@ package fr.almiris.open.wsrobot.conf;
 import java.util.Map;
 
 public class RobotStepConf {
+	private String description;
 	private String service;
 	private Map<String,String> headers;
 	private String[] params;
@@ -13,6 +14,14 @@ public class RobotStepConf {
 	public RobotStepConf() {
 	}
 	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public String getService() {
 		return service;
 	}

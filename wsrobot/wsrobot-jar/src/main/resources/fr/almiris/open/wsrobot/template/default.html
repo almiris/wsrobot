@@ -35,19 +35,20 @@
 				<div class="panel" data-status="{{status}}">
 					<div class="panel-heading">
 						<h4>
-							{{#conf}}{{name}}{{/conf}} 
+							<a href="#" class="collapseTrigger" data-trigger-state="show" data-div-is-showing="false" data-table-is-showing="false"><span class="glyphicon glyphicon-chevron-right">&nbsp;</span></a>
+							{{#conf}}{{name}}{{/conf}}
 							<span data-status="{{status}}" data-echo-status="{{status}}" class="label pull-right"></span>
 						</h4>
 					</div>
-					<div class="panel-body">
+					<div class="panel-body collapse">
 						<p>Executed in {{executionTime}} ms</p>
 						<p>Successful <span class="badge">{{successCount}}</span> Failed <span class="badge">{{errorCount}}</span></p>
 						{{#exception}}<p><span class="label label-danger">Exception</span> {{.}}</p>{{/exception}}
 					</div>
-						<table class="table">
+						<table class="table collapse">
 							<thead>
 							<tr>
-								<th>Step</th>
+								<th width="20%">Step</th>
 								<th>Status [Expected]</th>
 								<th>Info</th>
 							</tr>
@@ -58,6 +59,7 @@
 								<td><strong>{{#service}}{{name}}{{/service}}</strong></td>
 								<td><strong>{{actualStatus}}</strong> [{{#conf}}{{status}}{{/conf}}]</td>
 								<td>								
+								{{#conf}}{{#description}}<p><span class="label label-info">Description</span> {{.}}</p>{{/description}}{{/conf}}
 								<p><span class="label label-info">Duration</span> {{executionTime}} ms</p>
 								<p><span class="label label-info toUpperCase">{{#service}}{{method}}{{/service}}</span> {{fullURL}}</p>
 								{{#headers}}<p><span class="label label-info">Headers</span> {{.}}</p>{{/headers}}
@@ -104,6 +106,29 @@
 			$("tr[data-status='OK']").addClass("success");
 			$("tr[data-status]").not("[data-status='OK']").addClass("danger");
 			$(".toUpperCase").each(function(){$(this).html($(this).html().toUpperCase())});
+			$(".collapseTrigger").on("click", function() {
+				if ($(this).attr("data-div-is-showing") == "false" && $(this).attr("data-table-is-showing") == "false") {
+					var show = $(this).attr("data-trigger-state") == "show";
+					$(this).attr("data-div-is-showing", "true");
+					$(this).attr("data-table-is-showing", "true");
+					$(this).closest(".panel").find(show ? ".collapse" : ".in").collapse(show ? "show" : "hide");
+					$(this).attr("data-trigger-state", show ? "hide" : "show");
+					$(this).find("span").removeClass(show ? "glyphicon-chevron-right" : "glyphicon-chevron-down");
+					$(this).find("span").addClass(show ? "glyphicon-chevron-down" : "glyphicon-chevron-right");
+				}
+			});
+			$("div.collapse").on("shown.bs.collapse", function() {
+				$(this).closest(".panel").find(".collapseTrigger").attr("data-div-is-showing", "false");
+			});
+			$("table.collapse").on("shown.bs.collapse", function() {
+				$(this).closest(".panel").find(".collapseTrigger").attr("data-table-is-showing", "false");
+			});
+			$("div.collapse").on("hidden.bs.collapse", function() {
+				$(this).closest(".panel").find(".collapseTrigger").attr("data-div-is-showing", "false");
+			});
+			$("table.collapse").on("hidden.bs.collapse", function() {
+				$(this).closest(".panel").find(".collapseTrigger").attr("data-table-is-showing", "false");
+			});
 		});
 	</script>
 </body>

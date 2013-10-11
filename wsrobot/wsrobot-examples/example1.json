@@ -21,7 +21,7 @@
 			"name" : "A very simple scenario",
 			"active" : "true",
 			"steps" : [				
-				{ "service" : "sayHello", "params" : [ "$robot$" ], "status" : 200, "jcontrols" : { "$.message" : "Hello $robot$!"} },
+				{ "description" : "Ask the server to say hello", "service" : "sayHello", "params" : [ "$robot$" ], "status" : 200, "jcontrols" : { "$.message" : "Hello $robot$!"} },
 				{ "service" : "thankYou", "params" : [ "$server$" ], "status" : 200, "jcontrols" : { "$.message" : "You're welcome $robot$!", "$.from" : "$server$"} }
 			]
 		}
