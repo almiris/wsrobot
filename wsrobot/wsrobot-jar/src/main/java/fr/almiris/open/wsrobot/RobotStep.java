@@ -171,6 +171,15 @@ public class RobotStep {
 					}					
 				}
 			}
+			
+			if (stepConf.getPresults() != null) {
+				for (String property : stepConf.getPresults().keySet()) {
+					String value = suiteConf.replaceProperties(stepConf.getPresults().get(property));
+					suiteConf.getProperties().put(property, value);
+					suite.getLogger().debug("Property " + property + " has been set to " + value);
+					report.setProperty(property, value);
+				}
+			}
 		}
 		
 		return report;
