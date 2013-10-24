@@ -1,5 +1,10 @@
 package fr.almiris.open.wsrobot;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +50,7 @@ public class RobotStep {
 	public RobotStep() {
 	}
 	
-	public RobotStepReport run(RobotSuiteConf suiteConf, RobotScenarioConf scenarioConf, RobotStepConf stepConf, RobotSuite suite) {
+	public RobotStepReport run(RobotSuiteConf suiteConf, RobotScenarioConf scenarioConf, RobotStepConf stepConf, RobotSuite suite) throws UnsupportedEncodingException {
 		
 		RobotStepReport report = new RobotStepReport();
 		
@@ -60,7 +65,7 @@ public class RobotStep {
 		
 		report.setService(serviceConf);
 		
-		String fullURL = MessageFormat.format(suiteConf.replaceProperties(serviceConf.getUrl()), suiteConf.replaceProperties(stepConf.getParams())).toString();
+		String fullURL = MessageFormat.format(suiteConf.replaceProperties(serviceConf.getUrl()), encodeParams(suiteConf.replaceProperties(stepConf.getParams()))).toString();
 		suite.getLogger().debug("-----");
 		suite.getLogger().debug("Executing service : " + serviceConf.getName() + " ("+ fullURL + ")");
 		
@@ -184,4 +189,19 @@ public class RobotStep {
 		
 		return report;
 	}
+	
+	private String[] encodeParams(String[] strArr) throws UnsupportedEncodingException {
+		if (strArr == null) {
+			return null;
+		}
+		
+		String[] result = new String[strArr.length];
+		
+		for (int i = 0; i < strArr.length; i++) {
+			result[i] = URLEncoder.encode(strArr[i], "utf-8");
+		}
+		
+		return result;
+	}
+
 }
