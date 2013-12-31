@@ -48,8 +48,16 @@ public class RobotSuiteConf {
 	public String replaceProperties(String str) {
 		String result = str;
 		if (properties != null && str != null) {
-			for (String property : properties.keySet()) {
-				result = result.replace("$" + property + "$", properties.get(property));
+			boolean isReplace = true;
+			while (isReplace) {
+				isReplace = false;
+				for (String property : properties.keySet()) {
+					String toReplace = "$" + property + "$";
+					if (result.indexOf(toReplace) != -1) {
+						isReplace = true;
+						result = result.replace("$" + property + "$", properties.get(property));
+					}
+				}
 			}
 		}
 		return result;
