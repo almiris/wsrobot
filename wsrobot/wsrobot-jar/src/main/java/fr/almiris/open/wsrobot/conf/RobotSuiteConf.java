@@ -1,11 +1,14 @@
 package fr.almiris.open.wsrobot.conf;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class RobotSuiteConf {
 	
 	private String name;
+	private List<String> imports;
 	private Map<String,String> properties;
 	private Map<String, RobotServiceConf> services;
 	private List<RobotScenarioConf> scenarios;
@@ -19,6 +22,14 @@ public class RobotSuiteConf {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public List<String> getImports() {
+		return imports;
+	}
+
+	public void setImports(List<String> imports) {
+		this.imports = imports;
 	}
 
 	public Map<String, String> getProperties() {
@@ -77,4 +88,32 @@ public class RobotSuiteConf {
 		return result;
 	}
 
+	public void mergeAndOverrideWith(RobotSuiteConf conf) {
+		name = conf.getName();
+		
+		if (conf.getProperties() != null) {
+			if (properties == null) {
+				properties = new HashMap<String,String>(conf.getProperties());
+			}
+			else {
+				properties.putAll(conf.getProperties());
+			}
+		}
+		if (conf.getServices() != null) {
+			if (services == null) {
+				services = new HashMap<String,RobotServiceConf>(conf.getServices());
+			}
+			else {
+				services.putAll(conf.getServices());
+			}
+		}
+		if (conf.getScenarios() != null) {
+			if (scenarios == null) {
+				scenarios = new ArrayList<RobotScenarioConf>(conf.getScenarios());
+			}
+			else {
+				scenarios.addAll(conf.getScenarios());
+			}
+		}
+	}
 }

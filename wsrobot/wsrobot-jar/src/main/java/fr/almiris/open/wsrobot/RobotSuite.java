@@ -58,13 +58,20 @@ public class RobotSuite {
 		report.setConf(suiteConf);
 		try {
 			if (suiteConf.getScenarios() != null) {
+				boolean uniqueMode = false;
 				for (RobotScenarioConf scenarioConf : suiteConf.getScenarios()) {
-					if (scenarioConf.isActive()) {
+					if (scenarioConf.isUnique() == true) {
+						uniqueMode = true;
+						break;
+					}
+				}				
+				for (RobotScenarioConf scenarioConf : suiteConf.getScenarios()) {
+					if (scenarioConf.isActive() && (uniqueMode == false || scenarioConf.isUnique())) {
 						RobotScenario scenario = new RobotScenario();
 						RobotScenarioReport scenarioReport = scenario.run(suiteConf, scenarioConf, this);
 						report.addScenarioReport(scenarioReport);
 						if (scenarioReport.getStatus() == RobotScenario.Status.OK) {
-							successCount++;
+							successCount += scenarioConf.isMultiple() ? scenarioReport.getSuccessCount() : 1;
 						}
 						else {
 							errorCount++;

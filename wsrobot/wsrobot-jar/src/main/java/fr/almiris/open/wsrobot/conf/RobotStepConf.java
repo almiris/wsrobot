@@ -11,6 +11,7 @@ public class RobotStepConf {
 	private int status;
 	private Map<String,String> jcontrols;
 	private Map<String,String> presults;
+	private RobotSQLConf sql;
 	
 	public RobotStepConf() {
 	}
@@ -78,5 +79,11 @@ public class RobotStepConf {
 	public void setPresults(Map<String, String> presults) {
 		this.presults = presults;
 	}
-	
+	public RobotSQLConf getSql() {
+		return sql;
+	}
+	public void setSql(RobotSQLConf sql) {
+		this.sql = sql;
+	}
+
 }

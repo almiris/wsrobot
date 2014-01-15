@@ -4,7 +4,10 @@ import java.util.List;
 
 public class RobotScenarioConf {
 	private String name;
-	private boolean active;
+	private boolean active = true;
+	private boolean unique = false;
+	private boolean multiple = false;
+	
 	private List<RobotStepConf> steps;
 	
 	public RobotScenarioConf() {	
@@ -26,6 +29,22 @@ public class RobotScenarioConf {
 		this.active = active;
 	}
 	
+	public boolean isUnique() {
+		return unique;
+	}
+
+	public void setUnique(boolean unique) {
+		this.unique = unique;
+	}
+
+	public boolean isMultiple() {
+		return multiple;
+	}
+
+	public void setMultiple(boolean multiple) {
+		this.multiple = multiple;
+	}
+
 	public List<RobotStepConf> getSteps() {
 		return steps;
 	}

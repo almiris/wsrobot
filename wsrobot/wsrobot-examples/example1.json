@@ -1,27 +1,32 @@
 {
 	"name" : "Simple example",
+
+	"imports" : [ "env.json", "services.json" ],
 	
-	// global properties
+	// global properties (merged / overridden with env.json)
 	"properties" : { 
-		"baseURL" : "http://localhost:8080/wsrobot-webapp",
 		"robot" : "robot"
 	},
 	
-	// services
+	// services (merged / overridden with services.json)
 	"services" : {
-		"sayHello" : { "name" : "Say Hello", "url" : "$baseURL$/tests/sayHello?to={0}", "method" : "get", "headers" : { "Accept" : "application/json"}, "jresults" : { "server" : "$.from"} },
-		"thankYou" : { "name" : "Echo", "url" : "$baseURL$/tests/thankYou/{0}", "method" : "get", "headers" : {"From-Header" : "$robot$"} }
+		// overrides service defined in services.json
+		"sayHello" : { "name" : "Say Hello", "url" : "$baseURL$/tests/sayHello?to={0}", "method" : "get", "headers" : { "Accept" : "application/json"}, "jresults" : { "server" : "$.from"} }
 	},
 	
-	// scenarios
+	// scenarios (merged / overridden with imports)
 	"scenarios" : [
 	
 		// hello
 		{ 
 			"name" : "A very simple scenario",
+			// optional : true by default. false if the scenario should not be run
 			"active" : "true",
+			// optional : false by default. true if the scenario should be run alone (useful for testing one scenario without deactivating all the others) 
+			"unique" : "true",
 			"steps" : [				
 				{ "description" : "Ask the server to say hello", "service" : "sayHello", "params" : [ "$robot$" ], "status" : 200, "jcontrols" : { "$.message" : "Hello $robot$!"} },
+		//		{ "description" : "SQL example", "sql" : { "user" : "user", "password" : "password", "url" : "jdbc:postgresql://localhost:5432/yourdb", "reqs" : ["select 1"] } },
 				{ "service" : "thankYou", "params" : [ "$server$" ], "status" : 200, "jcontrols" : { "$.message" : "You're welcome $robot$!", "$.from" : "$server$"} }
 			]
 		}

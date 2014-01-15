@@ -1,0 +1,7 @@
+{
+	"name" : "Services definition",
+
+	"services" : {
+		"thankYou" : { "name" : "Echo", "url" : "$baseURL$/tests/thankYou/{0}", "method" : "get", "headers" : {"From-Header" : "$robot$"} }
+	}	
+}

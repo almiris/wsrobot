@@ -2,12 +2,18 @@
 	<description>
 		Simple WSRobot Example
 	</description>
-	<property name="wsrobot_jar" value="${basedir}/../wsrobot-jar/target/wsrobot-jar-jar-with-dependencies.jar"/>
+	<property name="wsrobot_jar" value="${basedir}/../wsrobot-jar/target/wsrobot.jar"/>
 	<property name="example1" value="${basedir}/example1"/>
+	<property name="postgresql_driver" value="${basedir}/postgresql-9.1-901-1.jdbc4.jar"/>
 	<target name="run">
-	    <java jar="${wsrobot_jar}" fork="true">
-	        <arg value="${example1}.json"/>
-	        <arg value="${example1}.out"/>
+	    <java classname="fr.almiris.open.wsrobot.RobotRunner" fork="true">
+			<classpath>
+	           	<pathelement location="${wsrobot_jar}"/>
+	           	<pathelement location="${postgresql_driver}"/>
+	        </classpath>
+          	<arg value="${example1}.json"/>
+	        <arg value="${example1}.out.json"/>
+	        <arg value="${example1}.out.html"/>
 		</java>
 	</target>
 </project>

@@ -1,0 +1,9 @@
+{
+	"name" : "Services definition",
+
+	"imports" : [ "services2.json" ],
+
+	"services" : {
+		"sayHello" : { "name" : "Say Hello (will be overridden)", "url" : "$baseURL$/tests/sayHello?to={0}", "method" : "get", "headers" : { "Accept" : "application/json"}, "jresults" : { "server" : "$.from"} }
+	}	
+}

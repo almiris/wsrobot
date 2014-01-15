@@ -42,5 +42,4 @@ public class RobotServiceConf {
 	public void setJresults(Map<String, String> jresults) {
 		this.jresults = jresults;
 	}
-
 }

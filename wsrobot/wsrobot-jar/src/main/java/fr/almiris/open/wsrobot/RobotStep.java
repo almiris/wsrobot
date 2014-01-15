@@ -1,18 +1,21 @@
 package fr.almiris.open.wsrobot;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
 
+import fr.almiris.open.wsrobot.conf.RobotSQLConf;
 import fr.almiris.open.wsrobot.conf.RobotScenarioConf;
 import fr.almiris.open.wsrobot.conf.RobotServiceConf;
 import fr.almiris.open.wsrobot.conf.RobotStepConf;
@@ -50,21 +53,46 @@ public class RobotStep {
 	public RobotStep() {
 	}
 	
-	public RobotStepReport run(RobotSuiteConf suiteConf, RobotScenarioConf scenarioConf, RobotStepConf stepConf, RobotSuite suite) throws UnsupportedEncodingException {
+	public RobotStepReport run(RobotSuiteConf suiteConf, RobotScenarioConf scenarioConf, RobotStepConf stepConf, RobotSuite suite) throws UnsupportedEncodingException, SQLException {
 		
 		RobotStepReport report = new RobotStepReport();
 		
 		report.setConf(stepConf);
 		
+		if (stepConf.getService() != null) {
+			if (execURL(suiteConf, stepConf, suite, report) == false) {
+				return report;
+			}			
+		}
+		else if (stepConf.getSql() != null) {
+			if (execSQL(suiteConf, stepConf, suite, report) == false) {
+				return report;
+			}						
+		}
+				
+		if (stepConf.getPresults() != null) {
+			for (String property : stepConf.getPresults().keySet()) {
+				String value = suiteConf.replaceProperties(stepConf.getPresults().get(property));
+				suiteConf.getProperties().put(property, value);
+				suite.getLogger().debug("Property " + property + " has been set to " + value);
+				report.setProperty(property, value);
+			}
+		}
+
+		return report;
+	}
+
+	private boolean execURL(RobotSuiteConf suiteConf, RobotStepConf stepConf, RobotSuite suite, RobotStepReport report) throws UnsupportedEncodingException {
 		RobotServiceConf serviceConf = suiteConf.getServices().get(stepConf.getService());
 		
 		if (serviceConf == null) {
 			report.setStatus(Status.ERROR_SERVICE_NOT_FOUND);
-			return report;
+			suite.getLogger().error("Service not found");
+			return false;
 		}
 		
 		report.setService(serviceConf);
-		
+
 		String fullURL = MessageFormat.format(suiteConf.replaceProperties(serviceConf.getUrl()), encodeParams(suiteConf.replaceProperties(stepConf.getParams()))).toString();
 		suite.getLogger().debug("-----");
 		suite.getLogger().debug("Executing service : " + serviceConf.getName() + " ("+ fullURL + ")");
@@ -122,7 +150,7 @@ public class RobotStep {
 		
 		if (stepOk == false) {
 			suite.getLogger().error("Status code is incorrect : " + status + " (" + stepConf.getStatus() + " was expected)");
-			return report;
+			return false;
 		}
 
 		suite.getLogger().debug("Status code is as expected : " + status);
@@ -134,7 +162,7 @@ public class RobotStep {
 			if (content == null) {
 				suite.getLogger().error("Content is null but controls are defined");
 				report.setStatus(Status.ERROR_CONTROL_NULL_CONTENT);
-				return report;
+				return false;
 			}
 
 			for (String jsonPath : stepConf.getJcontrols().keySet()) {
@@ -147,7 +175,7 @@ public class RobotStep {
 					report.setFailedControlExpectedValue(expectedValue);
 					report.setFailedControlActualValue(actualValue);
 					suite.getLogger().error("Control failed : " + jsonPath + " (expected = " + expectedValue + "; actual = " + actualValue + ")");
-					return report;
+					return false;
 				}
 			}
 		}
@@ -167,7 +195,7 @@ public class RobotStep {
 						report.setStatus(Status.ERROR_RESULT_NOT_FOUND);
 						report.setResultNotFound(jsonPath);
 						suite.getLogger().error("Result not found : " + jsonPath);
-						return report;
+						return false;
 					}
 					else {
 						suiteConf.getProperties().put(property, value);
@@ -175,19 +203,61 @@ public class RobotStep {
 						report.setProperty(property, value);
 					}					
 				}
+			}			
+		}
+		
+		return true;
+	}
+	
+	private boolean execSQL(RobotSuiteConf suiteConf, RobotStepConf stepConf, RobotSuite suite, RobotStepReport report) throws UnsupportedEncodingException, SQLException {
+		RobotSQLConf conf = stepConf.getSql();
+		
+		suite.getLogger().debug("-----");
+		suite.getLogger().debug("sql:");
+		
+		Connection conn = null;
+			
+		long start = System.currentTimeMillis();
+		
+		try {
+			if (conf.getUser() == null) {
+				conn = DriverManager.getConnection(suiteConf.replaceProperties(conf.getUrl()));
+			}
+			else {
+				conn = DriverManager.getConnection(suiteConf.replaceProperties(conf.getUrl()), suiteConf.replaceProperties(conf.getUser()), suiteConf.replaceProperties(conf.getPassword()));			
 			}
 			
-			if (stepConf.getPresults() != null) {
-				for (String property : stepConf.getPresults().keySet()) {
-					String value = suiteConf.replaceProperties(stepConf.getPresults().get(property));
-					suiteConf.getProperties().put(property, value);
-					suite.getLogger().debug("Property " + property + " has been set to " + value);
-					report.setProperty(property, value);
-				}
+			List<String> reqs = conf.getReqs();
+			
+			start = System.currentTimeMillis();
+
+			for (String req : reqs) {
+				conn.setAutoCommit(false);
+				String request = suiteConf.replaceProperties(req);
+				suite.getLogger().debug("Executing SQL request : " + request);
+				PreparedStatement stmt = conn.prepareStatement(request);
+				stmt.execute();
+				stmt.close();
+				conn.commit();
+			}
+			
+			report.setExecutionTime(System.currentTimeMillis() - start);
+		}
+		catch (SQLException e) {
+			report.setExecutionTime(System.currentTimeMillis() - start);
+			if (conn != null) {
+				conn.rollback();
+			}
+			throw e;
+		}
+		finally {
+			if (conn != null) {
+				conn.close();
 			}
 		}
 		
-		return report;
+		report.setStatus(RobotStep.Status.OK);
+		return true;
 	}
 	
 	private String[] encodeParams(String[] strArr) throws UnsupportedEncodingException {
