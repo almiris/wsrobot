@@ -5,6 +5,8 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -76,6 +78,21 @@ public class RobotStep {
 				suiteConf.getProperties().put(property, value);
 				suite.getLogger().debug("Property " + property + " has been set to " + value);
 				report.setProperty(property, value);
+			}
+		}
+
+		if (stepConf.getPcontrols() != null) {
+			for (String control : stepConf.getPcontrols().keySet()) {
+				String actualValue = suiteConf.replaceProperties(control);
+				String expectedValue = suiteConf.replaceProperties(stepConf.getPcontrols().get(control));
+				if ((expectedValue.startsWith("rxp:") && Pattern.matches(expectedValue.substring("rxp:".length()), actualValue) == false)||(expectedValue.equals(actualValue) == false)) {
+					report.setStatus(Status.ERROR_CONTROL_FAILED);
+					report.setFailedControl(control);
+					report.setFailedControlExpectedValue(expectedValue);
+					report.setFailedControlActualValue(actualValue);
+					suite.getLogger().error("Control failed : " + control + " (expected = " + expectedValue + "; actual = " + actualValue + ")");
+					return report;
+				}
 			}
 		}
 
@@ -215,8 +232,8 @@ public class RobotStep {
 		suite.getLogger().debug("-----");
 		suite.getLogger().debug("sql:");
 		
+		boolean result = true;
 		Connection conn = null;
-			
 		long start = System.currentTimeMillis();
 		
 		try {
@@ -236,7 +253,32 @@ public class RobotStep {
 				String request = suiteConf.replaceProperties(req);
 				suite.getLogger().debug("Executing SQL request : " + request);
 				PreparedStatement stmt = conn.prepareStatement(request);
-				stmt.execute();
+				if (request.length() >= "select".length() && request.substring(0, "select".length()).equalsIgnoreCase("select")) {
+					ResultSet rs = stmt.executeQuery();
+					if (rs != null) {
+						int index = 0;
+						ResultSetMetaData metaData = rs.getMetaData();
+						int colCount = metaData.getColumnCount();
+						result = colCount > 0 ? true : false;
+						while (rs.next()) {
+							for (int col = 0; col < colCount; col++) {
+								String property = metaData.getColumnLabel(col + 1) + "." + index;
+								String value = rs.getString(col + 1);
+								suiteConf.getProperties().put(property, value);
+								suite.getLogger().debug("Property " + property + " has been set to " + value);
+								report.setProperty(property, value);								
+							}
+							index++;
+						};
+					}
+					else { 
+						result = false;
+					}
+					rs.close();
+				}
+				else {
+					result = stmt.execute();
+				}
 				stmt.close();
 				conn.commit();
 			}
@@ -257,7 +299,7 @@ public class RobotStep {
 		}
 		
 		report.setStatus(RobotStep.Status.OK);
-		return true;
+		return result;
 	}
 	
 	private String[] encodeParams(String[] strArr) throws UnsupportedEncodingException {

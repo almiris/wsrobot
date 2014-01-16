@@ -10,6 +10,7 @@ public class RobotStepConf {
 	private String data;
 	private int status;
 	private Map<String,String> jcontrols;
+	private Map<String,String> pcontrols;
 	private Map<String,String> presults;
 	private RobotSQLConf sql;
 	
@@ -70,6 +71,14 @@ public class RobotStepConf {
 
 	public void setJcontrols(Map<String, String> jcontrols) {
 		this.jcontrols = jcontrols;
+	}
+
+	public Map<String, String> getPcontrols() {
+		return pcontrols;
+	}
+
+	public void setPcontrols(Map<String, String> pcontrols) {
+		this.pcontrols = pcontrols;
 	}
 
 	public Map<String, String> getPresults() {
