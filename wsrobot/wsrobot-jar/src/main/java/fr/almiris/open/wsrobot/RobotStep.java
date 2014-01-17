@@ -9,9 +9,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.jayway.jsonpath.InvalidPathException;
@@ -185,7 +188,8 @@ public class RobotStep {
 			for (String jsonPath : stepConf.getJcontrols().keySet()) {
 				String expectedValue = suiteConf.replaceProperties(stepConf.getJcontrols().get(jsonPath));
 				String actualValue = JsonPath.read(content, jsonPath).toString();
-				if ((expectedValue.startsWith("rxp:") && Pattern.matches(expectedValue.substring("rxp:".length()), actualValue) == false)||(expectedValue.equals(actualValue) == false)) {
+				if ((expectedValue.startsWith("rxp:") == true && Pattern.matches(expectedValue.substring("rxp:".length()), actualValue) == false)
+						|| (expectedValue.startsWith("rxp:") == false && expectedValue.equals(actualValue) == false)) {
 					stepOk = false;
 					report.setStatus(Status.ERROR_CONTROL_FAILED);
 					report.setFailedControl(jsonPath);
@@ -260,6 +264,28 @@ public class RobotStep {
 						ResultSetMetaData metaData = rs.getMetaData();
 						int colCount = metaData.getColumnCount();
 						result = colCount > 0 ? true : false;
+						
+						// reset properties that will be extracted from the result set
+						if (colCount > 0) {
+							for (int col = 0; col < colCount; col++) {
+								String prefix = metaData.getColumnLabel(col + 1) + ".";
+								Map<String,String> properties = suiteConf.getProperties();
+								Set<String> keySet = properties.keySet();
+								Iterator<String> keyIterator = keySet.iterator();
+								List<String> keysToRemove = new ArrayList<String>();
+								while (keyIterator.hasNext()) {
+									String key = keyIterator.next();
+									if (key.startsWith(prefix)) {
+										keysToRemove.add(key);
+									}
+								}
+								for (String key : keysToRemove) {
+									properties.remove(key);
+								}
+							}							
+						}
+						
+						// set properties from the result set
 						while (rs.next()) {
 							for (int col = 0; col < colCount; col++) {
 								String property = metaData.getColumnLabel(col + 1) + "." + index;
