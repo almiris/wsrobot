@@ -187,7 +187,7 @@ public class RobotStep {
 
 			for (String jsonPath : stepConf.getJcontrols().keySet()) {
 				String expectedValue = suiteConf.replaceProperties(stepConf.getJcontrols().get(jsonPath));
-				String actualValue = JsonPath.read(content, jsonPath).toString();
+				String actualValue = "" + JsonPath.read(content, jsonPath); // null => "null"
 				if ((expectedValue.startsWith("rxp:") == true && Pattern.matches(expectedValue.substring("rxp:".length()), actualValue) == false)
 						|| (expectedValue.startsWith("rxp:") == false && expectedValue.equals(actualValue) == false)) {
 					stepOk = false;
