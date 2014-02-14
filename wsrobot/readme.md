@@ -3,7 +3,7 @@
 WSRobot is a testing tool for REST web services that
 
 - respond to GET, POST or DELETE request
-- echange mainly JSON content
+- exchange mainly JSON content
  
 ## First steps
 
