@@ -1,0 +1,17 @@
+<project name="robot example" default="run" basedir=".">
+	<description>
+		WSRobot testing an OpenWeatherMap service
+	</description>
+	<property name="wsrobot_jar" value="${basedir}/../wsrobot-jar/target/wsrobot.jar"/>
+	<property name="openweathermap" value="${basedir}/openweathermap"/>
+   	<target name="run">
+	    <java classname="fr.almiris.open.wsrobot.RobotRunner" fork="true">
+			<classpath>
+	           	<pathelement location="${wsrobot_jar}"/>
+	        </classpath>
+          	<arg value="${openweathermap}.json"/>
+	        <arg value="${openweathermap}.out.json"/>
+	        <arg value="${openweathermap}.out.html"/>
+		</java>
+	</target>
+</project>

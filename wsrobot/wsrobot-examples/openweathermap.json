@@ -1,0 +1,23 @@
+{
+	"name" : "Simple OpenWeatherMap test",
+
+	"services" : {
+		"openweathermap" : { 
+			"name" : "Open Weather Map API", 
+			"url" : "http://api.openweathermap.org/data/2.5/weather?q={0}", 
+			"method" : "get" 
+		}
+	},
+
+	"scenarios" : [{	
+		"name" : "Montrouge Weather test",
+		"active" : "true",
+		"steps" : [{ 
+			"description" : "Check that the service responds", 
+			"service" : "openweathermap", 
+			"params" : [ "Montrouge,fr" ], 
+			"status" : 200, 
+			"jcontrols" : { "$.coord.lon" : "2.31"} 
+		}]
+	}]
+}
